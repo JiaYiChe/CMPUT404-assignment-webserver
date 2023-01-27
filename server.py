@@ -38,11 +38,11 @@ class MyWebServer(socketserver.BaseRequestHandler):
         self.data = self.request.recv(1024).strip()
         data = self.data.decode("utf-8")
         data = data.split("\r\n")
-        print ("Got a request of: %s\n" % data[0])
-        print ("Got a request of: %s\n" % data[1])
+        #print ("Got a request of: %s\n" % data[0])
+        #print ("Got a request of: %s\n" % data[1])
         method, path, HTTP = data[0].split(" ")
-        print ("url", path)
-        print ("Got a request of: %s\n" % path[-1])
+        #print ("url", path)
+        #print ("Got a request of: %s\n" % path[-1])
         if method == "GET":
             if path[-1] != "/" and "." not in path.split("/"):
                 #print("yes")
@@ -52,8 +52,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
             fileNames = path.split("/")[1:]
             
             if fileNames[-1] =="":
-                print("--------------------",path)
-                print("--------------------",fileNames)
+                #print("--------------------",path)
+                #print("--------------------",fileNames)
                 fileNames[-1] = "index.html"
 
             counter = 0
@@ -67,7 +67,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             filePath = "./www"
             for i in fileNames:
                 filePath = filePath+"/"+i
-            print("path",filePath)
+            #print("path",filePath)
             if os.path.exists(filePath):
                 status = "HTTP/1.1 200 OK\r\n"
                 contentType=""
@@ -77,7 +77,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                     contentType = "Content-Type: text/css\r\n"
                 
                 f = open(filePath, "r")
-                file = f.read()
+                file = '\r\n\r\n'+f.read()
                 f.close()
                 
                 self.request.sendall(bytearray(status+contentType+file, "utf-8"))
