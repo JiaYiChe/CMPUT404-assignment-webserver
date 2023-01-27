@@ -40,24 +40,17 @@ class MyWebServer(socketserver.BaseRequestHandler):
         self.data = self.request.recv(1024).strip()
         data = self.data.decode("utf-8")
         data = data.split("\r\n")
-        #print ("Got a request of: %s\n" % data[0])
-        #print ("Got a request of: %s\n" % data[1])
         method, path, HTTP = data[0].split(" ")
-        #print ("url", path)
-        #print ("Got a request of: %s\n" % path[-1])
 
         #check if required GET method
         if method == "GET":
             #check if path end with /, if not add it
             if path[-1] != "/" and "." not in path.split("/"):
-                #print("yes")
                 self.request.sendall(bytearray(f"HTTP/1.1 301 Moved Permanently\r\nLocation:{path+'/'}\r\n","utf-8"))
                 return
             #check if directory is empty if so add index.html 
             fileNames = path.split("/")[1:]
             if fileNames[-1] =="":
-                #print("--------------------",path)
-                #print("--------------------",fileNames)
                 fileNames[-1] = "index.html"
             #check if .html file added unnecessarily, if so remove it
             counter = 0
@@ -73,7 +66,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             #format file path to check if file exists
             for i in fileNames:
                 filePath = filePath+"/"+i
-            #print("path",filePath)
+
             #check if file exists
             if os.path.exists(filePath):
                 status = "HTTP/1.1 200 OK\r\n"
@@ -92,11 +85,11 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 return
             #if file not found return 404
             else:
-                self.request.sendall(bytearray(f"HTTP/1.1 404 Not Found\r\n",'utf-8'))
+                self.request.sendall(bytearray(f"HTTP/1.1 404 Not Found\r\n\r\n404 Not Found",'utf-8'))
                 return
         #if not GET method return 405
         else:
-            self.request.sendall(bytearray(f"HTTP/1.1 405 Method Not Allowed\r\n",'utf-8'))
+            self.request.sendall(bytearray(f"HTTP/1.1 405 Method Not Allowed\r\n\r\n405 Method Not Allowed",'utf-8'))
             return
 
 
