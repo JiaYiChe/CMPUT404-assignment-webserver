@@ -31,6 +31,8 @@ import time
 #https://www.geeksforgeeks.org/python-check-if-a-file-or-directory-exists-2/
 #https://docs.python.org/2/library/socketserver.html
 #https://stackoverflow.com/questions/3845423/remove-empty-strings-from-a-list-of-strings
+#https://http.dev/301
+#
 
 class MyWebServer(socketserver.BaseRequestHandler):
     
@@ -43,19 +45,21 @@ class MyWebServer(socketserver.BaseRequestHandler):
         method, path, HTTP = data[0].split(" ")
         #print ("url", path)
         #print ("Got a request of: %s\n" % path[-1])
+
+        #check if required GET method
         if method == "GET":
+            #check if path end with /, if not add it
             if path[-1] != "/" and "." not in path.split("/"):
                 #print("yes")
                 self.request.sendall(bytearray(f"HTTP/1.1 301 Moved Permanently\r\nLocation:{path+'/'}\r\n","utf-8"))
                 return
-
+            #check if directory is empty if so add index.html 
             fileNames = path.split("/")[1:]
-            
             if fileNames[-1] =="":
                 #print("--------------------",path)
                 #print("--------------------",fileNames)
                 fileNames[-1] = "index.html"
-
+            #check if .html file added unnecessarily, if so remove it
             counter = 0
             for i in fileNames:
                 if "." in i:
@@ -63,28 +67,34 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
             if counter > 1:
                 fileNames.pop()
+            #remove empty strings from list
             fileNames = list(filter(None, fileNames))
             filePath = "./www"
+            #format file path to check if file exists
             for i in fileNames:
                 filePath = filePath+"/"+i
             #print("path",filePath)
+            #check if file exists
             if os.path.exists(filePath):
                 status = "HTTP/1.1 200 OK\r\n"
                 contentType=""
+                #check if file is html or css
                 if ".html" in fileNames[-1]:
                     contentType = "Content-Type: text/html\r\n"
                 elif ".css" in fileNames[-1]:
                     contentType = "Content-Type: text/css\r\n"
-                
+                #read file and store it
                 f = open(filePath, "r")
-                file = '\r\n\r\n'+f.read()
+                file = '\r\n'+f.read() #end header with \r\n to start body
                 f.close()
-                
+                #send 200 status and file as body
                 self.request.sendall(bytearray(status+contentType+file, "utf-8"))
                 return
+            #if file not found return 404
             else:
                 self.request.sendall(bytearray(f"HTTP/1.1 404 Not Found\r\n",'utf-8'))
                 return
+        #if not GET method return 405
         else:
             self.request.sendall(bytearray(f"HTTP/1.1 405 Method Not Allowed\r\n",'utf-8'))
             return
